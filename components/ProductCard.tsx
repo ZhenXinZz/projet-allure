@@ -1,9 +1,9 @@
 "use client";
 
-import { type MouseEvent, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import { brands, type Product } from "@/lib/products";
 
 type ProductCardProps = {
@@ -19,59 +19,70 @@ export default function ProductCard({
 }: ProductCardProps) {
   const brandLogo = brands.find((brand) => brand.id === product.brandId)?.logo;
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const hasGallery = product.images.length > 1;
+  const [previousImageIndex, setPreviousImageIndex] = useState<number | null>(null);
+  const [hovered, setHovered] = useState(false);
 
-  function showPreviousImage(event: MouseEvent<HTMLButtonElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-    setActiveImageIndex((prev) =>
-      prev === 0 ? product.images.length - 1 : prev - 1
-    );
-  }
+  useEffect(() => {
+    if (!hovered || product.images.length <= 1) {
+      return;
+    }
+    const interval = window.setInterval(() => {
+      setActiveImageIndex((prev) => {
+        setPreviousImageIndex(prev);
+        return (prev + 1) % product.images.length;
+      });
+    }, 1250);
+    return () => window.clearInterval(interval);
+  }, [hovered, product.images.length]);
 
-  function showNextImage(event: MouseEvent<HTMLButtonElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-    setActiveImageIndex((prev) => (prev + 1) % product.images.length);
-  }
+  useEffect(() => {
+    if (previousImageIndex === null) {
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      setPreviousImageIndex(null);
+    }, 260);
+    return () => window.clearTimeout(timeout);
+  }, [previousImageIndex]);
 
   return (
     <article className="overflow-hidden rounded-[19px] border border-[#d8cab2] bg-[#fbf8f1] shadow-[0_6px_16px_rgba(55,43,28,0.08)]">
-      <Link href={`/catalogue/${product.id}`} className="block">
-        <div className="relative">
+      <Link
+        href={`/catalogue/${product.id}`}
+        className="block"
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={() => {
+          setHovered(false);
+          setPreviousImageIndex(null);
+          setActiveImageIndex(0);
+        }}
+      >
+        <div className="relative h-32 overflow-hidden">
+          {previousImageIndex !== null ? (
+            <Image
+              key={`${product.id}-prev-${previousImageIndex}`}
+              src={product.images[previousImageIndex] ?? product.image}
+              alt={product.name}
+              width={600}
+              height={500}
+              className="card-slide-out-left absolute inset-0 h-full w-full object-cover"
+            />
+          ) : null}
           <Image
+            key={`${product.id}-current-${activeImageIndex}`}
             src={product.images[activeImageIndex] ?? product.image}
             alt={product.name}
             width={600}
             height={500}
-            className="h-32 w-full object-cover"
+            className={`absolute inset-0 h-full w-full object-cover ${
+              previousImageIndex === null ? "" : "card-slide-in-left"
+            }`}
           />
 
           {brandLogo ? (
             <div className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-white/95">
               <Image src={brandLogo} alt={product.brand} width={20} height={20} />
             </div>
-          ) : null}
-
-          {hasGallery ? (
-            <>
-              <button
-                type="button"
-                onClick={showPreviousImage}
-                aria-label="Image precedente"
-                className="absolute left-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffaf1]/90 text-[#6f6250]"
-              >
-                <ChevronLeft size={13} />
-              </button>
-              <button
-                type="button"
-                onClick={showNextImage}
-                aria-label="Image suivante"
-                className="absolute right-10 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffaf1]/90 text-[#6f6250]"
-              >
-                <ChevronRight size={13} />
-              </button>
-            </>
           ) : null}
 
           <button

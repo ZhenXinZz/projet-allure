@@ -42,3 +42,83 @@ input::placeholder {
   width: 0;
   height: 0;
 }
+
+@keyframes cardSlideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes cardSlideInFromLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes cardSlideOutToLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes cardSlideOutToRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.card-slide-in-left {
+  animation: cardSlideInFromRight 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.card-slide-in-right {
+  animation: cardSlideInFromLeft 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.card-slide-out-left {
+  animation: cardSlideOutToLeft 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.card-slide-out-right {
+  animation: cardSlideOutToRight 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes promoSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes promoSlideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.promo-slide-in {
+  animation: promoSlideIn 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform;
+}
+
+.promo-slide-out {
+  animation: promoSlideOut 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform;
+}
