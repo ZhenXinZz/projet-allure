@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Uniqlo logo">
+  <rect width="120" height="120" rx="60" fill="#fdf9ef"/>
+  <rect x="30" y="24" width="60" height="72" rx="6" fill="#c81f25"/>
+  <text x="60" y="48" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="700" fill="#fff">UNI</text>
+  <text x="60" y="67" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="700" fill="#fff">QLO</text>
+</svg>

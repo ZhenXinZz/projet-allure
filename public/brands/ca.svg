@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="C and A logo">
+  <rect width="120" height="120" rx="60" fill="#fdf9ef"/>
+  <ellipse cx="60" cy="60" rx="42" ry="28" fill="#fff" stroke="#a91f2d" stroke-width="4"/>
+  <text x="60" y="67" text-anchor="middle" font-size="34" font-family="Times New Roman, serif" font-weight="700" fill="#17336a">C&amp;A</text>
+</svg>
