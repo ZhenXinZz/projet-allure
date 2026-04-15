@@ -11,100 +11,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-const morphotypes = ["Hommes", "Femmes", "Unisexe"];
-
-function AvatarFigure() {
-  return (
-    <div className="mx-auto w-[110px]">
-      <svg viewBox="0 0 120 270" className="h-[270px] w-full">
-        <defs>
-          <linearGradient id="bodyGradient" x1="0" x2="1">
-            <stop offset="0%" stopColor="#ece2cf" />
-            <stop offset="55%" stopColor="#d8c4a2" />
-            <stop offset="100%" stopColor="#f6f1e7" />
-          </linearGradient>
-        </defs>
-
-        <circle
-          cx="60"
-          cy="25"
-          r="16"
-          fill="url(#bodyGradient)"
-          stroke="#b79a63"
-          strokeWidth="1.5"
-        />
-
-        <path
-          d="M44 45 C47 63, 46 77, 40 99
-             C36 114, 38 126, 44 136
-             C49 145, 48 160, 42 184
-             L36 226
-             C35 235, 39 240, 46 240
-             L56 194
-             L60 146
-             L64 194
-             L74 240
-             C81 240, 85 235, 84 226
-             L78 184
-             C72 160, 71 145, 76 136
-             C82 126, 84 114, 80 99
-             C74 77, 73 63, 76 45
-             Z"
-          fill="url(#bodyGradient)"
-          stroke="#b79a63"
-          strokeWidth="1.5"
-        />
-
-        <path
-          d="M44 62 L28 113
-             C26 120, 30 126, 36 126
-             L49 91"
-          fill="none"
-          stroke="#b79a63"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-        <path
-          d="M76 62 L92 113
-             C94 120, 90 126, 84 126
-             L71 91"
-          fill="none"
-          stroke="#b79a63"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-
-        <line
-          x1="35"
-          y1="95"
-          x2="85"
-          y2="95"
-          stroke="#cdb183"
-          strokeDasharray="4 3"
-          strokeWidth="1.5"
-        />
-        <line
-          x1="37"
-          y1="127"
-          x2="83"
-          y2="127"
-          stroke="#cdb183"
-          strokeDasharray="4 3"
-          strokeWidth="1.5"
-        />
-        <line
-          x1="39"
-          y1="149"
-          x2="81"
-          y2="149"
-          stroke="#cdb183"
-          strokeDasharray="4 3"
-          strokeWidth="1.5"
-        />
-      </svg>
-    </div>
-  );
-}
+const morphotypes = [
+  { name: "Hommes", img: "/avatar/avatar_male_1776269159060.png" },
+  { name: "Femmes", img: "/avatar/avatar_female_1776269511074.png" },
+  { name: "Unisexe", img: "/avatar/avatar_unisex_1776269532587.png" }
+];
 
 function SmallInput({
   label,
@@ -118,9 +29,13 @@ function SmallInput({
   return (
     <div>
       <p className="mb-1 text-[12px] font-medium text-[#3b3127]">{label}</p>
-      <div className="flex h-10 items-center gap-2 rounded-2xl border border-[#d8cab2] bg-[#fbf8f1] px-3 text-sm text-[#8a7d69]">
+      <div className="flex h-10 items-center justify-between gap-2 rounded-2xl border border-[#d8cab2] bg-[#fbf8f1] px-3 py-1 text-sm text-[#8a7d69]">
         {icon}
-        <span>{placeholder}</span>
+        <input 
+          type="text" 
+          defaultValue={placeholder}
+          className="w-full bg-transparent outline-none text-right font-medium text-[#1a1510]" 
+        />
       </div>
     </div>
   );
@@ -128,175 +43,245 @@ function SmallInput({
 
 export default function EssayagePage() {
   const [selectedMorphotype, setSelectedMorphotype] = useState("Femmes");
+  const [step, setStep] = useState<"base" | "mensurations" | "guide">("base");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const avatarImage = morphotypes.find(m => m.name === selectedMorphotype)?.img;
 
   return (
     <>
-      <main className="px-4 pb-28 pt-14">
-        <div className="mb-5">
-          <p
-            className="text-[15px] tracking-[0.18em] text-[#b79a63]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            Allure
-          </p>
-          <h1 className="text-xl font-semibold text-[#1b1712]">
-            Base de votre Avatar
-          </h1>
-          <p className="text-sm text-[#7a6d5b]">
-            Générez un morphotype puis affinez vos mensurations.
-          </p>
-        </div>
-
-        <section className="mb-4 rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
-          <div className="mb-4 text-center">
-            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-[#efe3ca] text-[#a78953]">
-              <Sparkles size={18} />
+      <main className="px-4 pb-28 pt-14 space-y-6">
+        
+        {step === "base" && (
+          <>
+            <div className="mb-4">
+              <div className="flex justify-center mb-6">
+                <img src={avatarImage} alt="top avatar" className="h-16 w-auto object-contain mix-blend-multiply opacity-70" />
+              </div>
+              <h1 className="text-2xl font-semibold text-[#1b1712] text-center mb-2">
+                Base de votre Avatar
+              </h1>
+              <p className="text-sm text-[#7a6d5b] text-center">
+                Générez un morphotype.
+                <br />
+                Sélectionnez une base de départ
+              </p>
             </div>
-            <h2 className="text-lg font-semibold text-[#1d1813]">
-              Base de votre Avatar
-            </h2>
-            <p className="mx-auto mt-1 max-w-[260px] text-sm text-[#746857]">
-              Sélectionnez une base de départ cohérente pour débuter l’ajustement.
-            </p>
-          </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            {morphotypes.map((item) => {
-              const active = selectedMorphotype === item;
+            {/* SECTION 1: BASE DE L'AVATAR */}
+            <section className="rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 pb-6 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
+              <div className="grid grid-cols-3 gap-3">
+                {morphotypes.map((item) => {
+                  const active = selectedMorphotype === item.name;
 
-              return (
-                <button
-                  key={item}
-                  onClick={() => setSelectedMorphotype(item)}
-                  className={`rounded-[20px] border p-3 text-center shadow-sm ${
-                    active
-                      ? "border-[#c9ae72] bg-[linear-gradient(180deg,#f8f1df_0%,#efe3ca_100%)] shadow-[0_12px_24px_rgba(153,122,60,0.18)]"
-                      : "border-[#ddd1bd] bg-white"
-                  }`}
-                >
-                  <div className="mx-auto mb-3 flex h-24 w-14 items-center justify-center rounded-[18px] border border-[#d9ccb8] bg-[linear-gradient(180deg,#f5f1e8_0%,#e7ddcc_100%)]">
-                    <div className="h-16 w-8 rounded-[999px] border border-[#9e9077]" />
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => setSelectedMorphotype(item.name)}
+                      className={`relative flex flex-col items-center justify-between overflow-hidden rounded-[20px] p-2 pt-3 pb-3 transition-colors ${
+                        active
+                          ? "border border-[#c9ae72] bg-[linear-gradient(180deg,#f8f1df_0%,#efe3ca_100%)] shadow-[0_12px_24px_rgba(153,122,60,0.18)]"
+                          : "border border-[#ddd1bd] bg-white opacity-60"
+                      }`}
+                    >
+                      <div className="flex items-center justify-center h-[120px] mb-2 w-full">
+                        <img 
+                          src={item.img} 
+                          alt={item.name} 
+                          className="h-full w-full object-contain mix-blend-multiply drop-shadow-md" 
+                        />
+                      </div>
+                      <span className={`text-sm font-semibold ${active ? "text-[#2c241b]" : "text-[#5f5448]"}`}>
+                        {item.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button 
+                onClick={() => setStep("mensurations")}
+                className="mt-8 flex h-14 w-full items-center justify-center rounded-full bg-[linear-gradient(90deg,#b99f68_0%,#d8c08a_40%,#aa8d58_100%)] text-[15px] font-semibold text-[#1a1510] shadow-[0_4px_14px_rgba(185,159,104,0.3)] transition-transform active:scale-95"
+              >
+                Suivant
+              </button>
+            </section>
+          </>
+        )}
+
+        {step === "mensurations" && (
+          <>
+            {/* SECTION 2: MENSURATIONS CLES */}
+            <section className="rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-5 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-[#1d1813] text-center w-full">
+                  Mensurations Clés
+                </h2>
+              </div>
+
+              <div className="mb-8 grid grid-cols-2 gap-4">
+                <SmallInput
+                  label="Taille (cm)"
+                  placeholder="170 cm"
+                  icon={<Ruler size={16} />}
+                />
+                <SmallInput
+                  label="Poids (kg)"
+                  placeholder="63 kg"
+                  icon={<Scale size={16} />}
+                />
+              </div>
+
+              <div className="relative mb-8 flex h-[340px] items-center justify-between pr-2">
+                
+                {/* AVATAR LEFT SIDE */}
+                <div className="relative h-full w-[150px] flex justify-center mix-blend-multiply z-10">
+                  <img 
+                    src={avatarImage} 
+                    alt="Avatar Measurement" 
+                    className="h-full w-auto object-contain" 
+                  />
+                </div>
+
+                {/* SVG LINES TO CONNECT (ABSOLUTE) */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
+                  <path d="M 120 125 L 180 125" stroke="#b79a63" strokeWidth="1" strokeDasharray="3 3" />
+                  <path d="M 115 165 L 180 165" stroke="#b79a63" strokeWidth="1" strokeDasharray="3 3" />
+                  <path d="M 125 195 L 160 195 L 160 215 L 180 215" fill="transparent" stroke="#b79a63" strokeWidth="1" strokeDasharray="3 3" />
+                </svg>
+
+                {/* INPUTS RIGHT SIDE */}
+                <div className="flex-1 max-w-[150px] flex flex-col justify-center gap-6 z-10">
+                  <div className="relative">
+                    <SmallInput label="Tour de poitrine" placeholder="89" icon={<div className="text-[#a78953] w-4 h-4" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12h16M4 12a8 8 0 0116 0" /></svg></div>} />
                   </div>
-                  <span className="text-sm font-semibold text-[#2c241b]">
-                    {item}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  <div className="relative">
+                    <SmallInput label="Tour de taille" placeholder="68" icon={<div className="text-[#a78953] w-4 h-4" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12h16M4 12a8 8 0 0116 0" /></svg></div>} />
+                  </div>
+                  <div className="relative mt-2">
+                    <SmallInput label="Tour de hanches" placeholder="93" icon={<div className="text-[#a78953] w-4 h-4" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12h16M4 12l0 4M20 12l0 4" /></svg></div>} />
+                  </div>
 
-          <button className="mt-4 flex h-12 w-full items-center justify-center rounded-full bg-[linear-gradient(90deg,#b99f68_0%,#d8c08a_40%,#aa8d58_100%)] text-sm font-semibold text-[#1a1510]">
-            Suivant
-          </button>
-        </section>
-
-        <section className="mb-4 rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
-          <h2 className="mb-4 text-xl font-semibold text-[#1d1813]">
-            Mensurations Clés
-          </h2>
-
-          <div className="mb-4 grid grid-cols-2 gap-3">
-            <SmallInput
-              label="Taille (cm)"
-              placeholder="170"
-              icon={<Ruler size={14} />}
-            />
-            <SmallInput
-              label="Poids (kg)"
-              placeholder="63"
-              icon={<Scale size={14} />}
-            />
-          </div>
-
-          <div className="grid grid-cols-[1fr_110px_1fr] gap-2">
-            <div className="space-y-3">
-              <SmallInput label="Largeur d’épaule" placeholder="72" />
-              <SmallInput label="Tour de poitrine" placeholder="89" />
-              <SmallInput label="Tour de taille" placeholder="68" />
-            </div>
-
-            <div className="flex items-center justify-center">
-              <AvatarFigure />
-            </div>
-
-            <div className="space-y-3">
-              <SmallInput label="Hanches" placeholder="93" />
-              <SmallInput label="Entrejambe" placeholder="81" />
-              <SmallInput label="Poignet" placeholder="15" />
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center gap-2 rounded-[22px] bg-[#f2eadc] p-3 text-sm text-[#5f5448]">
-            <Check size={16} className="text-[#9a804b]" />
-            Vos mensurations sont complètes et prêtes pour générer l’avatar.
-          </div>
-
-          <div className="mt-4 flex gap-3">
-            <button className="flex flex-1 items-center justify-center rounded-full border border-[#cbb182] bg-[#f6efdf] px-4 py-3 text-sm font-semibold text-[#2c241b]">
-              <CircleHelp size={16} className="mr-2" />
-              Guide Visuel
-            </button>
-
-            <button className="flex flex-1 items-center justify-center rounded-full bg-[linear-gradient(90deg,#b99f68_0%,#d8c08a_40%,#aa8d58_100%)] px-4 py-3 text-sm font-semibold text-[#1a1510]">
-              Enregistrer
-            </button>
-          </div>
-        </section>
-
-        <section className="rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
-          <h2 className="mb-4 text-xl font-semibold text-[#1d1813]">
-            Guide Visuel de Mesure
-          </h2>
-
-          {[
-            {
-              title: "Poitrine",
-              text: "Ruban horizontal à plat au point le plus large.",
-            },
-            {
-              title: "Taille",
-              text: "À l’endroit le plus creux, posture droite et détendue.",
-            },
-            {
-              title: "Hanches",
-              text: "À l’endroit le plus large, sans serrer le ruban.",
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="mb-3 flex items-center gap-3 rounded-[22px] border border-[#ddd1bd] bg-white p-3"
-            >
-              <div className="flex h-20 w-24 items-center justify-center rounded-[18px] bg-[linear-gradient(180deg,#f7f2ea_0%,#ece2d0_100%)]">
-                <div className="relative h-14 w-10 rounded-[999px] border border-[#8f816b]">
-                  <div className="absolute left-1/2 top-1/2 h-[2px] w-12 -translate-x-1/2 -translate-y-1/2 bg-[#c5a76f]" />
+                  {/* SLIDER / TOGGLE FAKE */}
+                  <div className="flex justify-end mt-2 pr-2">
+                    <div className="w-[100px] h-6 flex items-center justify-between">
+                        <div className="h-1.5 w-12 bg-[#d8cab2] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#a78953] w-[60%]"></div>
+                        </div>
+                        <div className="w-10 h-6 bg-[#d8cab2] rounded-full relative">
+                          <div className="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow-sm"></div>
+                        </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex-1">
-                <p className="text-base font-semibold text-[#1d1813]">
-                  {item.title}.
-                </p>
-                <p className="text-sm text-[#5f5448]">{item.text}</p>
+              <div className="mt-4 flex gap-3">
+                <button 
+                  onClick={() => setStep("guide")}
+                  className="flex flex-1 items-center justify-center rounded-full border border-[#cbb182] bg-[linear-gradient(90deg,#b99f68_0%,#d8c08a_40%,#aa8d58_100%)] text-transparent bg-clip-text text-[15px] font-semibold transition-transform active:scale-95"
+                >
+                  Guide Visuel
+                  <CircleHelp size={16} className="ml-2 text-[#a78953]" />
+                </button>
+                <button 
+                  onClick={() => setShowSuccessModal(true)}
+                  className="flex flex-1 items-center justify-center rounded-full bg-[linear-gradient(90deg,#b99f68_0%,#d8c08a_40%,#aa8d58_100%)] px-4 py-3 text-[15px] font-semibold text-[#1a1510] shadow-[0_4px_14px_rgba(185,159,104,0.3)] transition-transform active:scale-95"
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </section>
+          </>
+        )}
+
+        {step === "guide" && (
+          <>
+            {/* SECTION 3: GUIDE VISUEL DE MESURE */}
+            <section className="rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
+              <h2 className="mb-6 text-xl font-semibold text-[#1d1813] text-center">
+                Guide Visuel de Mesure
+              </h2>
+
+              <div className="space-y-4 mb-6">
+                {[
+                  {
+                    title: "Poitrine.",
+                    text: "Ruban horizontal à plat.",
+                    img: "/avatar/guide_chest_1776269713909.png"
+                  },
+                  {
+                    title: "Taille.",
+                    text: "À l’endroit le plus creux.",
+                    img: "/avatar/guide_waist_1776269735373.png"
+                  },
+                  {
+                    title: "Hanches.",
+                    text: "À l’endroit le plus large.",
+                    img: "/avatar/guide_hips_1776269811274.png"
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="flex items-center gap-4 rounded-[22px] border border-[#ddd1bd] bg-[#fbf8f1] p-3 shadow-sm"
+                  >
+                    <div className="flex w-[100px] h-[90px] items-center justify-center rounded-[18px] bg-white overflow-hidden border border-[#eae0cc]">
+                      <img src={item.img} alt={item.title} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
+                    </div>
+
+                    <div className="flex-1">
+                      <p className="text-[15px] font-semibold text-[#1d1813] mb-1">
+                        {item.title}
+                      </p>
+                      <p className="text-[13px] text-[#5f5448] leading-tight pr-2">{item.text}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <ChevronRight size={18} className="text-[#8f816b]" />
-            </div>
-          ))}
+              <div className="flex items-center justify-between mt-8 mb-2">
+                <div className="flex items-center gap-3 text-[#1d1813]">
+                  <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="23" y2="8"></line><line x1="19" y1="12" x2="23" y2="12"></line><line x1="20" y1="16" x2="23" y2="16"></line></svg>
+                  <div>
+                    <p className="font-semibold text-[14px]">Conseils. <span className="font-normal text-[#5f5448]">Posture droite, détendue.</span></p>
+                  </div>
+                </div>
+              </div>
 
-          <div className="mt-2 flex items-center justify-between rounded-[22px] bg-[#f2eadc] px-4 py-3">
-            <div>
-              <p className="font-semibold text-[#1d1813]">Conseils</p>
-              <p className="text-sm text-[#5f5448]">Posture droite, détendue.</p>
-            </div>
+              <button 
+                onClick={() => setStep("mensurations")}
+                className="flex h-12 w-full items-center justify-center rounded-full bg-[linear-gradient(90deg,#b99f68_0%,#d8c08a_40%,#aa8d58_100%)] text-[15px] font-semibold text-[#1a1510] shadow-[0_4px_14px_rgba(185,159,104,0.3)] mt-6 transition-transform active:scale-95"
+              >
+                Fermer
+              </button>
+            </section>
+          </>
+        )}
+      </main>
 
-            <button className="rounded-full bg-[linear-gradient(90deg,#b99f68_0%,#d8c08a_40%,#aa8d58_100%)] px-5 py-2 text-sm font-semibold text-[#1a1510]">
-              Fermer
+      {/* SUCCESS MODAL */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1d1813]/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-[300px] rounded-[28px] bg-[#fbf8f1] p-6 shadow-2xl">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#efe3ca] text-[#a78953]">
+              <Check size={32} strokeWidth={2.5} />
+            </div>
+            <h3 className="mb-2 text-center text-xl font-semibold text-[#1d1813]">
+              Succès
+            </h3>
+            <p className="mb-6 text-center text-[14px] text-[#5f5448]">
+              Vos mensurations ont été enregistrées avec succès !
+            </p>
+            <button 
+              onClick={() => setShowSuccessModal(false)}
+              className="flex h-12 w-full items-center justify-center rounded-full bg-[linear-gradient(90deg,#b99f68_0%,#d8c08a_40%,#aa8d58_100%)] text-[15px] font-semibold text-[#1a1510] shadow-[0_4px_14px_rgba(185,159,104,0.3)] transition-transform active:scale-95"
+            >
+              OK
             </button>
           </div>
-        </section>
-      </main>
+        </div>
+      )}
 
       <BottomNav />
     </>
   );
-}
+}
