@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Sparkles, Heart, User, LayoutGrid } from "lucide-react";
+import { House, Sparkles, ShoppingBag, User, LayoutGrid } from "lucide-react";
 
 const items = [
   { href: "/", label: "Accueil", icon: House },
   { href: "/essayage", label: "Avatar", icon: Sparkles },
   { href: "/catalogue", label: "Catalogue", icon: LayoutGrid },
-  { href: "/panier", label: "Favoris", icon: Heart },
+  { href: "/panier", label: "Panier", icon: ShoppingBag },
   { href: "/login", label: "Profil", icon: User },
 ];
 
@@ -16,8 +16,14 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky bottom-0 left-0 right-0 z-50 rounded-t-[22px] border-t border-[#d7cab2] bg-[#f6f1e7]/98 shadow-[0_-8px_22px_rgba(24,19,14,0.12)] backdrop-blur">
-      <div className="grid grid-cols-5 px-1 pb-[max(0.7rem,env(safe-area-inset-bottom))] pt-1.5">
+    <nav
+      className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-[22px] border border-[#d7cab2] bg-[#f6f1e7]/98 shadow-[0_-8px_22px_rgba(24,19,14,0.12)] backdrop-blur"
+      style={{
+        width:
+          "min(376px, calc(100vw - 44px), calc((100dvh - 28px) * 440 / 956 - 16px))",
+      }}
+    >
+      <div className="grid grid-cols-5 px-1 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1.5">
         {items.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;

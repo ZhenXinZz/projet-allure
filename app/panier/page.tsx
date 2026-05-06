@@ -2,13 +2,25 @@
 
 import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
-import ProductCard from "@/components/ProductCard";
-import { products } from "@/lib/products";
-import { useFavorites } from "@/lib/useFavorites";
+import { Minus, Plus, Trash2 } from "lucide-react";
+import { getProductById } from "@/lib/products";
+import { useCart } from "@/lib/useCart";
 
 export default function PanierPage() {
-  const { ready, favoriteSet, toggleFavorite } = useFavorites();
-  const favoriteProducts = products.filter((product) => favoriteSet.has(product.id));
+  const { ready, items, itemCount, removeItem, updateQuantity } = useCart();
+  const cartLines = items
+    .map((item) => {
+      const product = getProductById(item.productId);
+      if (!product) {
+        return null;
+      }
+      return { ...item, product };
+    })
+    .filter((item) => item !== null);
+  const total = cartLines.reduce(
+    (sum, line) => sum + line.product.price * line.quantity,
+    0
+  );
 
   return (
     <>
@@ -20,35 +32,125 @@ export default function PanierPage() {
           >
             Allure
           </p>
-          <h1 className="text-xl font-semibold text-[#1b1712]">Favoris</h1>
+          <h1 className="text-xl font-semibold text-[#1b1712]">Panier</h1>
           <p className="text-sm text-[#7a6d5b]">
-            Vos pièces enregistrées pour plus tard.
+            {itemCount > 0
+              ? `${itemCount} article${itemCount > 1 ? "s" : ""} pret${
+                  itemCount > 1 ? "s" : ""
+                } a etre commandes.`
+              : "Ajoutez vos pieces preferees depuis la fiche produit."}
           </p>
         </div>
 
         {!ready ? (
           <div className="rounded-[22px] border border-[#d8cab2] bg-[#fbf8f1] p-4 text-sm text-[#6a5c49]">
-            Chargement de vos favoris...
+            Chargement de votre panier...
           </div>
-        ) : favoriteProducts.length === 0 ? (
+        ) : cartLines.length === 0 ? (
           <div className="rounded-[22px] border border-[#d8cab2] bg-[#fbf8f1] p-4 text-sm text-[#6a5c49]">
-            Aucun favori pour l&apos;instant. Ajoutez des articles depuis le{" "}
+            Votre panier est vide. Ajoutez des articles depuis le{" "}
             <Link href="/catalogue" className="font-semibold text-[#8f7244]">
               catalogue
             </Link>
             .
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {favoriteProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                favorite
-                onToggleFavorite={toggleFavorite}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-3">
+              {cartLines.map((line) => (
+                <article
+                  key={`${line.product.id}-${line.size}`}
+                  className="rounded-[22px] border border-[#d8cab2] bg-[#fbf8f1] p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-[#7f6a47]">
+                        {line.product.brand}
+                      </p>
+                      <Link
+                        href={`/catalogue/${line.product.id}`}
+                        className="text-base font-semibold text-[#1d1813]"
+                      >
+                        {line.product.name}
+                      </Link>
+                      <p className="mt-1 text-sm text-[#6f6250]">
+                        Taille {line.size}
+                      </p>
+                    </div>
+                    <p className="text-base font-semibold text-[#1d1813]">
+                      {line.product.price * line.quantity}€
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateQuantity(
+                            line.product.id,
+                            line.size,
+                            line.quantity - 1
+                          )
+                        }
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d8cab2] bg-white text-[#2b241d]"
+                        aria-label="Diminuer la quantite"
+                      >
+                        <Minus size={15} />
+                      </button>
+                      <span className="min-w-8 text-center text-sm font-semibold text-[#1d1813]">
+                        {line.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateQuantity(
+                            line.product.id,
+                            line.size,
+                            line.quantity + 1
+                          )
+                        }
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d8cab2] bg-white text-[#2b241d]"
+                        aria-label="Augmenter la quantite"
+                      >
+                        <Plus size={15} />
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => removeItem(line.product.id, line.size)}
+                      className="inline-flex items-center gap-2 rounded-full border border-[#e2d0c4] px-3 py-2 text-sm text-[#7b4f42]"
+                    >
+                      <Trash2 size={14} />
+                      Retirer
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <section className="mt-4 rounded-[22px] border border-[#d8cab2] bg-[#fbf8f1] p-4">
+              <div className="flex items-center justify-between text-sm text-[#6f6250]">
+                <span>Sous-total</span>
+                <span className="font-semibold text-[#1d1813]">{total}€</span>
+              </div>
+              <div className="mt-2 flex items-center justify-between text-sm text-[#6f6250]">
+                <span>Livraison</span>
+                <span className="font-semibold text-[#1d1813]">Offerte</span>
+              </div>
+              <div className="mt-4 flex items-center justify-between border-t border-[#eadfcb] pt-4">
+                <span className="text-sm font-semibold text-[#1d1813]">Total</span>
+                <span className="text-lg font-semibold text-[#1d1813]">{total}€</span>
+              </div>
+              <button
+                type="button"
+                className="mt-4 w-full rounded-full bg-[#1b1712] px-4 py-3 text-sm font-semibold uppercase tracking-wide text-[#f6f1e7]"
+              >
+                Passer la commande
+              </button>
+            </section>
+          </>
         )}
       </main>
 

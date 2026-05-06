@@ -224,3 +224,20 @@ export const products: Product[] = [
 export function getProductById(id: number) {
   return products.find((product) => product.id === id);
 }
+
+export function getSimilarProducts(product: Product, limit = 4) {
+  return products
+    .filter((item) => item.id !== product.id)
+    .sort((a, b) => {
+      const scoreA =
+        Number(a.category === product.category) * 3 +
+        Number(a.style === product.style) * 2 +
+        Number(a.brandId === product.brandId);
+      const scoreB =
+        Number(b.category === product.category) * 3 +
+        Number(b.style === product.style) * 2 +
+        Number(b.brandId === product.brandId);
+      return scoreB - scoreA;
+    })
+    .slice(0, limit);
+}
