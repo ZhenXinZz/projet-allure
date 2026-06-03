@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowLeft,
   ChevronDown,
@@ -12,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
+import ZoomableImage from "@/components/ZoomableImage";
 import { getSimilarProducts, type Product } from "@/lib/products";
 import { useCart } from "@/lib/useCart";
 import { useFavorites } from "@/lib/useFavorites";
@@ -86,36 +86,37 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-[22px] border border-[#d8cab2] bg-[#fbf8f1]">
-        <Image
-          src={activeImage}
-          alt={product.name}
-          width={800}
-          height={900}
-          className="h-72 w-full object-cover object-top"
-        />
-      </div>
+      <ZoomableImage
+        src={activeImage}
+        alt={product.name}
+        previewHeight="h-96"
+      />
 
-      <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-        {product.images.map((image) => (
-          <button
-            key={image}
-            type="button"
-            onClick={() => setActiveImage(image)}
-            className={`overflow-hidden rounded-xl border ${
-              activeImage === image ? "border-[#b99f68]" : "border-[#d8cab2]"
-            }`}
-          >
-            <Image
-              src={image}
-              alt={product.name}
-              width={64}
-              height={64}
-              className="h-16 w-16 object-cover"
-            />
-          </button>
-        ))}
-      </div>
+      {product.images.length > 1 ? (
+        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+          {product.images.map((image) => (
+            <button
+              key={image}
+              type="button"
+              onClick={() => setActiveImage(image)}
+              className={`flex-shrink-0 overflow-hidden rounded-xl border ${
+                activeImage === image ? "border-[#b99f68]" : "border-[#d8cab2]"
+              }`}
+            >
+              <div className="relative h-16 w-16 bg-white">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={image}
+                  alt={product.name}
+                  width={64}
+                  height={64}
+                  className="h-16 w-16 object-cover"
+                />
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <section className="mt-4 rounded-[22px] border border-[#d8cab2] bg-[#fbf8f1] p-4">
         <div className="flex items-start justify-between gap-2">

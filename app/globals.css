@@ -122,3 +122,135 @@ input::placeholder {
   animation: promoSlideOut 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
   will-change: transform;
 }
+
+/* =========================================================
+   US2 — Simulation mouvement (twist / bras + léger pivot)
+   Durée totale ≤ 5 s (US2 critère). On anime :
+     - le buste (rotation Z légère)
+     - les bras (balancement)
+     - le vêtement (léger flottement)
+   ========================================================= */
+@keyframes avatarTwist {
+  0%   { transform: rotate(0deg)   translateX(0); }
+  15%  { transform: rotate(-7deg)  translateX(-3px); }
+  30%  { transform: rotate(6deg)   translateX(4px); }
+  45%  { transform: rotate(-5deg)  translateX(-2px); }
+  60%  { transform: rotate(4deg)   translateX(3px); }
+  75%  { transform: rotate(-2deg)  translateX(-1px); }
+  100% { transform: rotate(0deg)   translateX(0); }
+}
+
+@keyframes armSway {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(-12deg); }
+  50%  { transform: rotate(0deg); }
+  75%  { transform: rotate(12deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes garmentFloat {
+  0%   { transform: translateY(0)    skewX(0deg); }
+  25%  { transform: translateY(-1.5px) skewX(-1deg); }
+  50%  { transform: translateY(0)    skewX(0deg); }
+  75%  { transform: translateY(-1px)   skewX(1deg); }
+  100% { transform: translateY(0)    skewX(0deg); }
+}
+
+.avatar-twist {
+  animation: avatarTwist 4200ms cubic-bezier(0.45, 0, 0.55, 1) both;
+  transform-origin: 60px 180px;
+  will-change: transform;
+}
+.avatar-twist .arm-left {
+  animation: armSway 1400ms ease-in-out infinite;
+}
+.avatar-twist .arm-right {
+  animation: armSway 1400ms ease-in-out infinite reverse;
+  animation-delay: 80ms;
+}
+.avatar-twist .garment-float {
+  animation: garmentFloat 1400ms ease-in-out infinite;
+}
+
+/* =========================================================
+   US3 — Vue en mouvement (marche)
+   Durée 10 s (US3 critère : 8-12 s), pausable, rejouable.
+   ========================================================= */
+@keyframes walkStep {
+  /* Avatar monte/descend très légèrement (rebond) pendant la marche. */
+  0%   { transform: translateY(0); }
+  25%  { transform: translateY(-4px); }
+  50%  { transform: translateY(0); }
+  75%  { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes legSwing {
+  0%   { transform: rotate(-22deg); }
+  50%  { transform: rotate(22deg); }
+  100% { transform: rotate(-22deg); }
+}
+
+@keyframes armSwing {
+  0%   { transform: rotate(20deg); }
+  50%  { transform: rotate(-20deg); }
+  100% { transform: rotate(20deg); }
+}
+
+@keyframes garmentSway {
+  0%   { transform: translateX(-2px)  skewX(-1.5deg); }
+  50%  { transform: translateX(2px)   skewX(1.5deg); }
+  100% { transform: translateX(-2px)  skewX(-1.5deg); }
+}
+
+@keyframes shadowPulse {
+  0%   { transform: scaleX(1);   opacity: 0.4; }
+  50%  { transform: scaleX(0.85); opacity: 0.3; }
+  100% { transform: scaleX(1);   opacity: 0.4; }
+}
+
+.avatar-walk {
+  animation: walkStep 700ms ease-in-out infinite;
+  will-change: transform;
+}
+.avatar-walk .leg-left {
+  animation: legSwing 700ms ease-in-out infinite;
+  transform-origin: 52px 180px;
+}
+.avatar-walk .leg-right {
+  animation: legSwing 700ms ease-in-out infinite reverse;
+  animation-delay: 40ms;
+  transform-origin: 68px 180px;
+}
+.avatar-walk .arm-left {
+  animation: armSwing 700ms ease-in-out infinite;
+  transform-origin: 44px 62px;
+}
+.avatar-walk .arm-right {
+  animation: armSwing 700ms ease-in-out infinite reverse;
+  animation-delay: 40ms;
+  transform-origin: 76px 62px;
+}
+.avatar-walk .garment-float {
+  animation: garmentSway 700ms ease-in-out infinite;
+}
+.shadow-bounce {
+  animation: shadowPulse 700ms ease-in-out infinite;
+  transform-origin: 60px 262px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-twist,
+  .avatar-walk,
+  .avatar-twist .arm-left,
+  .avatar-twist .arm-right,
+  .avatar-twist .garment-float,
+  .avatar-walk .leg-left,
+  .avatar-walk .leg-right,
+  .avatar-walk .arm-left,
+  .avatar-walk .arm-right,
+  .avatar-walk .garment-float,
+  .shadow-bounce {
+    animation: none !important;
+  }
+}

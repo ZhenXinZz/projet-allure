@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { House, Sparkles, ShoppingBag, User, LayoutGrid } from "lucide-react";
+import { useCart } from "@/lib/useCart";
 
 const items = [
   { href: "/", label: "Accueil", icon: House },
@@ -14,6 +15,8 @@ const items = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { ready, itemCount } = useCart();
+  const showCount = ready && itemCount > 0;
 
   return (
     <nav
@@ -27,6 +30,7 @@ export default function BottomNav() {
         {items.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
+          const isCart = item.href === "/panier";
 
           return (
             <Link
@@ -35,13 +39,18 @@ export default function BottomNav() {
               className="flex min-h-[52px] flex-col items-center justify-start gap-0.5 py-0.5"
             >
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                className={`relative flex h-8 w-8 items-center justify-center rounded-full ${
                   active
                     ? "bg-[#1b1712] text-[#d7bf8a] shadow-[0_8px_20px_rgba(27,23,18,0.22)]"
                     : "text-[#746a5c]"
                 }`}
               >
                 <Icon size={16} />
+                {isCart && showCount ? (
+                  <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#12703a] px-1 text-[9px] font-semibold leading-none text-white">
+                    {itemCount}
+                  </span>
+                ) : null}
               </div>
               <span
                 className={`block text-[10px] leading-[1.15] ${

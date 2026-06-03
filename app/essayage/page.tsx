@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
+import ZoomableImage from "@/components/ZoomableImage";
+import AvatarSimulator from "@/components/AvatarSimulator";
+import { useCart } from "@/lib/useCart";
+import { getProductById, products, type Product } from "@/lib/products";
 import {
   CircleHelp,
   Ruler,
@@ -9,6 +16,8 @@ import {
   Sparkles,
   Check,
   ChevronRight,
+  ShoppingBag,
+  RotateCcw,
 } from "lucide-react";
 
 const morphotypes = ["Hommes", "Femmes", "Unisexe"];
@@ -24,7 +33,6 @@ function AvatarFigure() {
             <stop offset="100%" stopColor="#f6f1e7" />
           </linearGradient>
         </defs>
-
         <circle
           cx="60"
           cy="25"
@@ -33,7 +41,6 @@ function AvatarFigure() {
           stroke="#b79a63"
           strokeWidth="1.5"
         />
-
         <path
           d="M44 45 C47 63, 46 77, 40 99
              C36 114, 38 126, 44 136
@@ -54,7 +61,6 @@ function AvatarFigure() {
           stroke="#b79a63"
           strokeWidth="1.5"
         />
-
         <path
           d="M44 62 L28 113
              C26 120, 30 126, 36 126
@@ -73,7 +79,6 @@ function AvatarFigure() {
           strokeWidth="1.5"
           strokeLinecap="round"
         />
-
         <line
           x1="35"
           y1="95"
@@ -126,8 +131,49 @@ function SmallInput({
   );
 }
 
-export default function EssayagePage() {
+function EssayageInner() {
+  const searchParams = useSearchParams();
+  const queryProductId = Number(searchParams.get("productId"));
+  const initialProduct: Product | undefined = Number.isInteger(queryProductId)
+    ? getProductById(queryProductId)
+    : undefined;
+
   const [selectedMorphotype, setSelectedMorphotype] = useState("Femmes");
+  const [selectedProductId, setSelectedProductId] = useState<number | undefined>(
+    initialProduct?.id
+  );
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [activeImage, setActiveImage] = useState<string | undefined>(
+    initialProduct?.images[0]
+  );
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  const cart = useCart();
+  const product = useMemo(
+    () =>
+      selectedProductId !== undefined
+        ? getProductById(selectedProductId)
+        : undefined,
+    [selectedProductId]
+  );
+
+  // When the user picks a different product from the picker, reset transient state.
+  useEffect(() => {
+    if (product) {
+      setActiveImage(product.images[0]);
+      if (!product.sizes.includes(selectedSize)) {
+        setSelectedSize(product.sizes[0] ?? "");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProductId]);
+
+  const handleAddToCart = () => {
+    if (!product || !selectedSize) return;
+    cart.addItem(product.id, selectedSize);
+    setAddedToCart(true);
+    window.setTimeout(() => setAddedToCart(false), 1800);
+  };
 
   return (
     <>
@@ -147,6 +193,80 @@ export default function EssayagePage() {
           </p>
         </div>
 
+        {/* Product picker (only shown if we came from /catalogue or to choose another). */}
+        <section className="mb-4 rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#efe3ca] text-[#a78953]">
+              <Sparkles size={15} />
+            </div>
+            <h2 className="text-base font-semibold text-[#1d1813]">
+              Vêtement à essayer
+            </h2>
+          </div>
+          {product ? (
+            <div className="flex items-center gap-3">
+              <div className="relative h-20 w-16 flex-shrink-0 overflow-hidden rounded-[14px] border border-[#d8cab2] bg-white">
+                {activeImage ? (
+                  <Image
+                    src={activeImage}
+                    alt={product.name}
+                    width={120}
+                    height={160}
+                    className="h-full w-full object-cover object-top"
+                  />
+                ) : null}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8f7244]">
+                  {product.brand}
+                </p>
+                <p className="truncate text-sm font-semibold text-[#1d1813]">
+                  {product.name}
+                </p>
+                <p className="mt-0.5 text-xs text-[#6f6250]">
+                  {product.price}€ • {product.category}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-[#746857]">
+              Aucun vêtement sélectionné. Choisissez une pièce depuis le
+              catalogue pour l'essayer.
+            </p>
+          )}
+
+          <details className="mt-3">
+            <summary className="cursor-pointer text-[12px] font-semibold uppercase tracking-[0.14em] text-[#8f7244]">
+              Changer de vêtement
+            </summary>
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {products.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setSelectedProductId(item.id)}
+                  className={`overflow-hidden rounded-[14px] border ${
+                    selectedProductId === item.id
+                      ? "border-[#1b1712]"
+                      : "border-[#d8cab2]"
+                  }`}
+                  aria-label={`Sélectionner ${item.name}`}
+                >
+                  <div className="relative h-20 w-full bg-white">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={120}
+                      height={160}
+                      className="h-full w-full object-cover object-top"
+                    />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </details>
+        </section>
+
         <section className="mb-4 rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
           <div className="mb-4 text-center">
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-[#efe3ca] text-[#a78953]">
@@ -156,14 +276,14 @@ export default function EssayagePage() {
               Base de votre Avatar
             </h2>
             <p className="mx-auto mt-1 max-w-[260px] text-sm text-[#746857]">
-              Sélectionnez une base de départ cohérente pour débuter l’ajustement.
+              Sélectionnez une base de départ cohérente pour débuter
+              l'ajustement.
             </p>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             {morphotypes.map((item) => {
               const active = selectedMorphotype === item;
-
               return (
                 <button
                   key={item}
@@ -210,7 +330,7 @@ export default function EssayagePage() {
 
           <div className="grid grid-cols-[1fr_110px_1fr] gap-2">
             <div className="space-y-3">
-              <SmallInput label="Largeur d’épaule" placeholder="72" />
+              <SmallInput label="Largeur d'épaule" placeholder="72" />
               <SmallInput label="Tour de poitrine" placeholder="89" />
               <SmallInput label="Tour de taille" placeholder="68" />
             </div>
@@ -228,7 +348,7 @@ export default function EssayagePage() {
 
           <div className="mt-4 flex items-center gap-2 rounded-[22px] bg-[#f2eadc] p-3 text-sm text-[#5f5448]">
             <Check size={16} className="text-[#9a804b]" />
-            Vos mensurations sont complètes et prêtes pour générer l’avatar.
+            Vos mensurations sont complètes et prêtes pour générer l'avatar.
           </div>
 
           <div className="mt-4 flex gap-3">
@@ -243,7 +363,136 @@ export default function EssayagePage() {
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
+        {/* =================== US1 — Zoom sur le vêtement =================== */}
+        {product && activeImage ? (
+          <section className="mb-4 rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
+            <div className="mb-3 flex items-start justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8f7244]">
+                  Détails du tissu
+                </p>
+                <h2 className="mt-1 text-lg font-semibold text-[#1d1813]">
+                  Zoom sur le vêtement
+                </h2>
+                <p className="mt-1 text-sm text-[#746857]">
+                  Pincez, scrollez ou glissez pour observer la texture, les
+                  coutures et les finitions.
+                </p>
+              </div>
+              <RotateCcw size={18} className="text-[#8f7244]" />
+            </div>
+
+            <ZoomableImage
+              src={activeImage}
+              alt={product.name}
+              previewHeight="h-80"
+            />
+
+            {product.images.length > 1 ? (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                {product.images.map((image) => (
+                  <button
+                    key={image}
+                    type="button"
+                    onClick={() => setActiveImage(image)}
+                    className={`overflow-hidden rounded-xl border ${
+                      activeImage === image
+                        ? "border-[#b99f68]"
+                        : "border-[#d8cab2]"
+                    }`}
+                    aria-label="Changer de vue"
+                  >
+                    <Image
+                      src={image}
+                      alt={product.name}
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+
+        {/* =================== US2 + US3 — Simulation + Marche =================== */}
+        <AvatarSimulator productName={product?.name} />
+
+        {/* =================== US4 — Ajout au panier depuis l'essayage =================== */}
+        {product ? (
+          <section className="mt-4 rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
+            <div className="mb-3 flex items-start justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8f7244]">
+                  Finaliser
+                </p>
+                <h2 className="mt-1 text-lg font-semibold text-[#1d1813]">
+                  Ajouter au panier
+                </h2>
+                <p className="mt-1 text-sm text-[#746857]">
+                  Sélectionnez votre taille, puis ajoutez l'article directement
+                  depuis l'essayage.
+                </p>
+              </div>
+              <p className="whitespace-nowrap text-base font-semibold text-[#1d1813]">
+                {product.price}€
+              </p>
+            </div>
+
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#6f6250]">
+                Taille
+              </p>
+              <span className="text-[11px] text-[#8f7244]">Guide des tailles</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {product.sizes.map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setSelectedSize(size)}
+                  className={`inline-flex min-w-11 items-center justify-center rounded-full border px-3 py-2 text-[0.8rem] font-semibold ${
+                    selectedSize === size
+                      ? "border-[#1b1712] bg-[#1b1712] text-[#f6f1e7]"
+                      : "border-[#d8cab2] bg-white text-[#2f261b]"
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={!selectedSize}
+              className="mt-4 flex w-full items-center justify-center rounded-full bg-[#12703a] px-4 py-3 text-[0.82rem] font-semibold uppercase tracking-[0.14em] text-[#f6f1e7] disabled:cursor-not-allowed disabled:bg-[#8cb69b]"
+            >
+              <ShoppingBag size={15} className="mr-2" />
+              {addedToCart
+                ? "Ajouté au panier"
+                : "Ajouter au panier"}
+            </button>
+            {addedToCart ? (
+              <p
+                className="mt-3 rounded-2xl bg-[#f2eadc] p-3 text-[0.8rem] font-medium text-[#12703a]"
+                role="status"
+                aria-live="polite"
+              >
+                Article ajouté au panier en taille {selectedSize}.{" "}
+                <Link
+                  href="/panier"
+                  className="font-semibold text-[#12703a] underline"
+                >
+                  Voir le panier
+                </Link>
+              </p>
+            ) : null}
+          </section>
+        ) : null}
+
+        <section className="mt-4 rounded-[28px] border border-[#d7cab2] bg-[#fbf8f1] p-4 shadow-[0_10px_24px_rgba(55,43,28,0.08)]">
           <h2 className="mb-4 text-xl font-semibold text-[#1d1813]">
             Guide Visuel de Mesure
           </h2>
@@ -255,11 +504,11 @@ export default function EssayagePage() {
             },
             {
               title: "Taille",
-              text: "À l’endroit le plus creux, posture droite et détendue.",
+              text: "À l'endroit le plus creux, posture droite et détendue.",
             },
             {
               title: "Hanches",
-              text: "À l’endroit le plus large, sans serrer le ruban.",
+              text: "À l'endroit le plus large, sans serrer le ruban.",
             },
           ].map((item) => (
             <div
@@ -298,5 +547,19 @@ export default function EssayagePage() {
 
       <BottomNav />
     </>
+  );
+}
+
+export default function EssayagePage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="px-4 pb-28 pt-14">
+          <p className="text-sm text-[#7a6d5b]">Chargement de l'essayage…</p>
+        </main>
+      }
+    >
+      <EssayageInner />
+    </Suspense>
   );
 }
